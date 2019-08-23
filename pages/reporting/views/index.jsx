@@ -1,11 +1,11 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import { Header, Snippet } from '@asl/components';
-import { countBy } from 'lodash';
+import { groupBy } from 'lodash';
 import { format, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
 
 const Metric = ({ number, label }) => {
-  if (number !== Math.floor(number)) {
+  if (typeof number === 'number' && number !== Math.floor(number)) {
     number = number.toFixed(2);
   }
   return <div className="metric">
@@ -34,23 +34,39 @@ const Index = ({ metrics, since }) => {
     month: format(startOfMonth(now), 'YYYY-MM-DD'),
     year: format(startOfYear(now), 'YYYY-MM-DD')
   }
-  const counts = countBy(metrics, 'type');
-  const pplApplications = metrics.filter(m => m.type === 'project-application');
+  const groups = groupBy(metrics, 'type');
+  const pplApplications = groups['project-application'];
   const iterations = pplApplications
     .map(m => m.iterations)
     .reduce((sum, i) => sum + i, 0);
   const meanIterations = pplApplications.length ? iterations / pplApplications.length : '-';
+
+  const meanProcessing = list => {
+    if (!list || !list.length) {
+      return '-';
+    }
+    const hours = list.reduce((sum, item, i, list) => sum + (item.processing / list.length), 0);
+    const wholeHours = Math.floor(hours);
+    const minutes = Math.round((hours - wholeHours) * 60);
+    if (wholeHours > 8) {
+      return `${Math.floor(wholeHours/8)}d${wholeHours % 8}h${minutes}m`;
+    }
+    return `${wholeHours}h${minutes}m`;
+  }
 
   return <Fragment>
 
     <Header title="Performance metrics"/>
 
     <div className="govuk-grid-row">
-      <div className="govuk-grid-column-one-half">
+      <div className="govuk-grid-column-one-third">
         <Metric number={metrics.length} label="total tasks completed" />
       </div>
-      <div className="govuk-grid-column-one-half">
+      <div className="govuk-grid-column-one-third">
         <Metric number={meanIterations} label="mean iterations per PPL application" />
+      </div>
+      <div className="govuk-grid-column-one-third">
+        <Metric number={meanProcessing(metrics)} label="mean end-to-end processing time" />
       </div>
     </div>
 
@@ -59,12 +75,20 @@ const Index = ({ metrics, since }) => {
     <div className="govuk-grid-row">
       <div className="govuk-grid-column-full">
         <table className="govuk-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>#</th>
+              <th>e2e</th>
+            </tr>
+          </thead>
           <tbody>
             {
               types.map(type => {
                 return <tr key={type}>
                   <td><Snippet>{ type }</Snippet></td>
-                  <td>{ counts[type] || '0' }</td>
+                  <td>{ (groups[type] || []).length }</td>
+                  <td>{ meanProcessing(groups[type]) }</td>
                 </tr>;
               })
             }

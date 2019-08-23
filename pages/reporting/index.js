@@ -2,6 +2,7 @@ const { page } = require('@asl/service/ui');
 const archiver = require('archiver');
 const { get } = require('lodash');
 const filenamify = require('filenamify');
+const moment = require('moment-business-time');
 
 const nts = require('./lib/nts-summary');
 
@@ -58,7 +59,12 @@ module.exports = settings => {
     req.api(`/metrics?since=${since}`)
       .then(response => {
         res.locals.static.since = since;
-        res.locals.static.metrics = response.json;
+        res.locals.static.metrics = response.json.map(metric => {
+          return {
+            ...metric,
+            processing: moment(metric.closed).workingDiff(metric.opened, 'hours', true)
+          };
+        });
         next();
       })
       .catch(next);
