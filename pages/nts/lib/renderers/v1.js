@@ -21,6 +21,15 @@ const renderDuration = (doc, value) => {
   doc.createParagraph(`${value.years} ${years} ${value.months} ${months}`).style('body');
 };
 
+const renderKeywords = (doc, value) => {
+  if (!value || !Array.isArray(value)) {
+    return;
+  }
+  value.map(keyword => {
+    doc.createParagraph(keyword).style('body').bullet();
+  });
+};
+
 const renderAnimalQuantities = (doc, data) => {
   const species = [
     ...(data.species || []),
@@ -55,6 +64,7 @@ const render = (doc, project) => {
   table.getCell(0, 1).addParagraph(new Paragraph(project.project.title).style('Heading2'));
 
   table.getCell(1, 0).addParagraph(new Paragraph('Key Words (max. 5 words)').style('body'));
+  renderKeywords(table.getCell(1, 1), project.data.keywords);
 
   table.getCell(2, 0).addParagraph(new Paragraph('Expected duration of the project (yrs)').style('body'));
   renderDuration(table.getCell(2, 1), project.data.duration);
