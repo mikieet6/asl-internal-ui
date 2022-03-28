@@ -33,7 +33,7 @@
   "dependencies": {
     "@asl/components": "^10.12.1",
     "@asl/constants": "^1.0.0",
-    "@asl/pages": "^27.11.2",
+    "@asl/pages": "^27.12.1",
     "@asl/projects": "^10.3.1",
     "@asl/service": "^9.0.1",
     "@babel/core": "^7.6.2",
@@ -57,7 +57,9 @@
     "filenamify": "^4.1.0",
     "lodash": "^4.17.19",
     "moment": "^2.24.0",
+    "mustache": "^2.3.2",
     "ndjson": "^1.5.0",
+    "r2": "^2.0.1",
     "react": "^16.9.0",
     "react-markdown": "^6.0.2",
     "react-redux": "^7.2.2",
